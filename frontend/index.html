@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+    name="description"
+    content="CodeComment AI is an NLP-powered code analysis and automatic comment generation platform."
+>
+
+    <title>CodeComment AI | NLP Code Comment Generator</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            <span class="logo-icon">&lt;/&gt;</span>
+            <span>CodeComment <b>AI</b></span>
+        </div>
+
+        <div class="nav-links">
+    <a href="#home">Home</a>
+    <a href="#features">Features</a>
+    <a href="#how-it-works">How It Works</a>
+    <a href="#about">About</a>
+</div>
+
+        <div class="status">
+            <span class="status-dot"></span>
+            NLP Online
+        </div>
+
+    </nav>
+
+
+    <!-- ================= HERO ================= -->
+
+    <section class="hero" id="home">
+
+        <div class="hero-content">
+
+            <div class="badge">
+                ✨ NLP Powered Code Analysis
+            </div>
+
+            <h1>
+                Turn Your Code Into
+                <span>Meaningful Comments</span>
+            </h1>
+
+            <p>
+                CodeComment AI analyzes your source code using
+                Natural Language Processing and generates clear,
+                meaningful explanations automatically.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= WORKSPACE ================= -->
+
+    <main class="workspace">
+
+        <!-- LEFT SIDE -->
+
+        <section class="editor-card">
+
+            <div class="card-header">
+
+                <div>
+                    <h2>Code Editor</h2>
+                    <p>Enter your source code below</p>
+                </div>
+
+                <div class="language-wrapper">
+
+                    <label for="language">
+                        Language
+                    </label>
+
+                    <select id="language">
+
+                        <option value="python">
+                            Python
+                        </option>
+
+                        <option value="javascript">
+                            JavaScript
+                        </option>
+
+                        <option value="java">
+                            Java
+                        </option>
+
+                        <option value="cpp">
+                            C++
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <div class="editor">
+
+                <div class="line-numbers" id="lineNumbers">
+                    1
+                </div>
+
+                <textarea
+                    id="codeInput"
+                    spellcheck="false"
+                    placeholder="# Enter your code here..."
+                ></textarea>
+
+            </div>
+
+
+            <div class="editor-actions">
+
+    <button
+        type="button"
+        class="btn btn-secondary"
+        id="sampleBtn">
+        📄 Sample
+    </button>
+
+    <button
+        type="button"
+        class="btn btn-secondary"
+        id="clearBtn">
+        🗑 Clear
+    </button>
+
+    <button
+        type="button"
+        class="btn btn-run"
+        id="runBtn">
+        ▶ Run Code
+    </button>
+
+    <button
+        type="button"
+        class="btn btn-generate"
+        id="generateBtn">
+        ✨ Generate Comment
+    </button>
+
+</div>
+
+        </section>
+
+
+        <!-- RIGHT SIDE -->
+
+        <section class="result-card">
+
+            <div class="card-header">
+
+                <div>
+                    <h2>Generated Comment</h2>
+                    <p>AI-generated code explanation</p>
+                </div>
+
+                <button
+                    class="copy-btn"
+                    id="copyBtn"
+                    title="Copy comment"
+                >
+                    📋
+                </button>
+
+            </div>
+
+
+            <div
+                class="comment-output"
+                id="commentOutput"
+            >
+
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+                        ✨
+                    </div>
+
+                    <h3>
+                        Your comment will appear here
+                    </h3>
+
+                    <p>
+                        Enter some code and click
+                        <strong>Generate Comment</strong>
+                        to analyze it.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- CODE OUTPUT -->
+
+            <div class="execution-section">
+
+                <div class="execution-header">
+
+                    <div>
+                        <h3>Terminal Output</h3>
+                    </div>
+
+                    <span
+                        id="executionStatus"
+                        class="status-badge"
+                    >
+                        Ready
+                    </span>
+
+                </div>
+
+                <div
+                    class="terminal"
+                    id="terminalOutput"
+                >
+                    <span class="terminal-symbol">$</span>
+                    <span id="outputText">
+                        Run your code to see the output...
+                    </span>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+        <!-- ================= HOW IT WORKS ================= -->
+
+    <section class="how-it-works" id="how-it-works">
+
+        <div class="section-heading">
+
+            <span class="section-tag">
+                HOW IT WORKS
+            </span>
+
+            <h2>
+                From Source Code to Natural Language
+            </h2>
+
+            <p>
+                CodeComment AI analyzes source code using
+                programming-construct detection and NLP-based
+                processing to generate understandable explanations.
+            </p>
+
+        </div>
+
+
+        <div class="workflow-grid">
+
+            <div class="workflow-card">
+
+                <div class="workflow-number">
+                    01
+                </div>
+
+                <div class="workflow-icon">
+                    💻
+                </div>
+
+                <h3>
+                    Enter Code
+                </h3>
+
+                <p>
+                    Write or paste your source code into
+                    the online code editor.
+                </p>
+
+            </div>
+
+
+            <div class="workflow-card">
+
+                <div class="workflow-number">
+                    02
+                </div>
+
+                <div class="workflow-icon">
+                    🧠
+                </div>
+
+                <h3>
+                    NLP Analysis
+                </h3>
+
+                <p>
+                    The NLP engine identifies functions,
+                    variables, loops, conditions and operations.
+                </p>
+
+            </div>
+
+
+            <div class="workflow-card">
+
+                <div class="workflow-number">
+                    03
+                </div>
+
+                <div class="workflow-icon">
+                    ✨
+                </div>
+
+                <h3>
+                    Generate Comment
+                </h3>
+
+                <p>
+                    The identified code structures are converted
+                    into natural-language explanations.
+                </p>
+
+            </div>
+
+
+            <div class="workflow-card">
+
+                <div class="workflow-number">
+                    04
+                </div>
+
+                <div class="workflow-icon">
+                    🚀
+                </div>
+
+                <h3>
+                    View Results
+                </h3>
+
+                <p>
+                    View generated comments and program output
+                    directly in the web application.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= FEATURES ================= -->
+
+    <section
+        class="features"
+        id="features"
+    >
+
+        <div class="section-heading">
+
+            <div class="badge">
+                🚀 Features
+            </div>
+
+            <h2>
+    Powerful Tools for Code Understanding
+</h2>
+
+<p>
+    Analyze, execute and document your source code
+    through one simple full-stack platform.
+</p>
+
+        </div>
+
+
+        <div class="feature-grid">
+
+    <!-- FEATURE 1 -->
+
+    <div class="feature-card">
+
+        <div class="feature-icon purple">
+            🤖
+        </div>
+
+        <h3>
+            Code Understanding
+        </h3>
+
+        <p>
+            Detect important programming constructs
+            such as variables, functions, loops,
+            conditions and operations.
+        </p>
+
+    </div>
+
+
+    <!-- FEATURE 2 -->
+
+    <div class="feature-card">
+
+        <div class="feature-icon blue">
+            💬
+        </div>
+
+        <h3>
+            Automatic Comments
+        </h3>
+
+        <p>
+            Convert detected code structures into
+            clear and meaningful natural-language
+            explanations.
+        </p>
+
+    </div>
+
+
+    <!-- FEATURE 3 -->
+
+    <div class="feature-card">
+
+        <div class="feature-icon green">
+            ▶
+        </div>
+
+        <h3>
+            Code Execution
+        </h3>
+
+        <p>
+            Run Python code directly in the application
+            and view the execution output instantly.
+        </p>
+
+    </div>
+
+
+    <!-- FEATURE 4 -->
+
+    <div class="feature-card">
+
+        <div class="feature-icon orange">
+            📋
+        </div>
+
+        <h3>
+            One-Click Copy
+        </h3>
+
+        <p>
+            Copy the generated code explanation
+            easily with a single click.
+        </p>
+
+    </div>
+
+</div>
+
+    </section>
+
+
+    <!-- ================= ABOUT ================= -->
+
+    <section
+        class="about"
+        id="about"
+    >
+
+        <div class="about-content">
+
+            <div class="badge">
+                📚 About the Project
+            </div>
+
+            <h2>
+                CodeComment AI
+            </h2>
+
+            <p>
+                CodeComment AI is a full-stack Natural Language
+                Processing application designed to analyze source
+                code and automatically generate meaningful comments.
+            </p>
+
+            <p>
+                The application combines a modern web interface,
+                Node.js backend services and a Python-based NLP
+                engine to transform source code into human-readable
+                explanations.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer>
+
+        <div class="footer-logo">
+            &lt;/&gt; CodeComment AI
+        </div>
+
+        <p>
+            Full Stack NLP Project
+        </p>
+
+        <p class="copyright">
+            © 2026 CodeComment AI
+        </p>
+
+    </footer>
+
+
+    <script src="script.js"></script>
+
+</body>
+</html>
