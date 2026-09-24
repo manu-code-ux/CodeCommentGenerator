@@ -211,7 +211,7 @@ generateBtn.addEventListener(
 
             const response =
             await fetch(
-"https://i.onrecodecomment-backend-apnder.com/api/generate-comment",
+"https://codecomment-backend-api.onrender.com/api/generate-comment", 
                {
                         method: "POST",
 
@@ -347,7 +347,7 @@ runBtn.addEventListener(
 
             const response =
                 await fetch(
-                    "https://i.onrecodecomment-backend-apnder.com/api/run-code",
+                    "https://codecomment-backend-api.onrender.com/api/run-code", 
                     {
                         method: "POST",
 
