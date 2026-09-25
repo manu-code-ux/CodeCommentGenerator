@@ -6,35 +6,38 @@ from comment_generator import generate_comment
 
 def main():
 
-    # Check whether code was provided
+    # ==========================================
+    # CHECK INPUT
+    # ==========================================
 
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
 
         print(
             json.dumps({
                 "success": False,
-                "error": "No code provided."
+                "error": "Code and language are required."
             })
         )
 
         return
 
 
-    # Get source code
+    # ==========================================
+    # GET CODE
+    # ==========================================
 
     code = sys.argv[1]
 
+    # ==========================================
+    # GET LANGUAGE
+    # ==========================================
 
-    # Get language
-
-    language = "python"
-
-    if len(sys.argv) >= 3:
-
-        language = sys.argv[2]
+    language = sys.argv[2]
 
 
-    # Generate NLP comment
+    # ==========================================
+    # GENERATE COMMENT
+    # ==========================================
 
     comment = generate_comment(
         code,
@@ -42,7 +45,9 @@ def main():
     )
 
 
-    # Prepare JSON response
+    # ==========================================
+    # PREPARE RESPONSE
+    # ==========================================
 
     result = {
 
@@ -55,7 +60,9 @@ def main():
     }
 
 
-    # Send JSON to Node.js
+    # ==========================================
+    # SEND JSON RESPONSE
+    # ==========================================
 
     print(
         json.dumps(result)

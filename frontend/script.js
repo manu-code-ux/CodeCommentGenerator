@@ -1,21 +1,11 @@
 const codeInput = document.getElementById("codeInput");
-
 const language = document.getElementById("language");
 
-const generateBtn =
-    document.getElementById("generateBtn");
-
-const runBtn =
-    document.getElementById("runBtn");
-
-const clearBtn =
-    document.getElementById("clearBtn");
-
-    const sampleBtn =
-    document.getElementById("sampleBtn");
-
-const copyBtn =
-    document.getElementById("copyBtn");
+const generateBtn = document.getElementById("generateBtn");
+const runBtn = document.getElementById("runBtn");
+const clearBtn = document.getElementById("clearBtn");
+const sampleBtn = document.getElementById("sampleBtn");
+const copyBtn = document.getElementById("copyBtn");
 
 const commentOutput =
     document.getElementById("commentOutput");
@@ -30,7 +20,6 @@ const lineNumbers =
     document.getElementById("lineNumbers");
 
 
-
 /* =====================================================
    LINE NUMBERS
 ===================================================== */
@@ -43,22 +32,20 @@ function updateLineNumbers() {
     let numbers = "";
 
     for (let i = 1; i <= lines; i++) {
-
         numbers += i + "<br>";
-
     }
 
     lineNumbers.innerHTML = numbers;
 }
-
 
 codeInput.addEventListener(
     "input",
     updateLineNumbers
 );
 
+
 /* =====================================================
-   SAMPLE CODE
+   SAMPLE
 ===================================================== */
 
 sampleBtn.addEventListener(
@@ -82,12 +69,8 @@ print(total)`;
         updateLineNumbers();
 
         commentOutput.innerHTML = `
-
             <div class="empty-state">
-
-                <div class="empty-icon">
-                    ✨
-                </div>
+                <div class="empty-icon">✨</div>
 
                 <h3>
                     Ready to analyze
@@ -98,9 +81,7 @@ print(total)`;
                     <strong>Generate Comment</strong>
                     to analyze the sample code.
                 </p>
-
             </div>
-
         `;
 
         terminalOutput.textContent =
@@ -108,14 +89,13 @@ print(total)`;
 
         executionStatus.textContent =
             "Ready";
-
     }
 );
 
-/* =====================================================
-   CLEAR CODE
-===================================================== */
 
+/* =====================================================
+   CLEAR
+===================================================== */
 
 clearBtn.addEventListener(
     "click",
@@ -126,7 +106,6 @@ clearBtn.addEventListener(
         updateLineNumbers();
 
         commentOutput.innerHTML = `
-
             <div class="empty-state">
 
                 <div class="empty-icon">
@@ -144,7 +123,6 @@ clearBtn.addEventListener(
                 </p>
 
             </div>
-
         `;
 
         terminalOutput.textContent =
@@ -152,7 +130,6 @@ clearBtn.addEventListener(
 
         executionStatus.textContent =
             "Ready";
-
     }
 );
 
@@ -168,6 +145,10 @@ generateBtn.addEventListener(
         const code =
             codeInput.value.trim();
 
+        const selectedLanguage =
+            language.value;
+
+
         if (!code) {
 
             alert(
@@ -175,7 +156,6 @@ generateBtn.addEventListener(
             );
 
             return;
-
         }
 
 
@@ -186,7 +166,6 @@ generateBtn.addEventListener(
 
 
         commentOutput.innerHTML = `
-
             <div class="empty-state">
 
                 <div class="empty-icon">
@@ -203,16 +182,15 @@ generateBtn.addEventListener(
                 </p>
 
             </div>
-
         `;
 
 
         try {
 
             const response =
-            await fetch(
-"https://codecomment-backend-api.onrender.com/api/generate-comment", 
-               {
+                await fetch(
+                    "http://localhost:5000/api/generate-comment",
+                    {
                         method: "POST",
 
                         headers: {
@@ -221,14 +199,10 @@ generateBtn.addEventListener(
                         },
 
                         body: JSON.stringify({
-
                             code: code,
-
                             language:
-                                language.value
-
+                                selectedLanguage
                         })
-
                     }
                 );
 
@@ -248,20 +222,15 @@ generateBtn.addEventListener(
 
 
             commentOutput.innerHTML = `
-
                 <div class="generated-comment">
-
                     ${escapeHTML(data.comment)}
-
                 </div>
-
             `;
 
 
         } catch (error) {
 
             commentOutput.innerHTML = `
-
                 <div class="empty-state">
 
                     <div class="empty-icon">
@@ -277,7 +246,6 @@ generateBtn.addEventListener(
                     </p>
 
                 </div>
-
             `;
 
         } finally {
@@ -286,7 +254,6 @@ generateBtn.addEventListener(
 
             generateBtn.textContent =
                 "✨ Generate Comment";
-
         }
 
     }
@@ -304,6 +271,9 @@ runBtn.addEventListener(
         const code =
             codeInput.value.trim();
 
+        const selectedLanguage =
+            language.value;
+
 
         if (!code) {
 
@@ -312,20 +282,16 @@ runBtn.addEventListener(
             );
 
             return;
-
         }
 
 
-        if (language.value !== "python") {
+        if (!selectedLanguage) {
 
-            terminalOutput.textContent =
-                "Code execution is currently available for Python.";
-
-            executionStatus.textContent =
-                "Not Supported";
+            alert(
+                "Please select a programming language."
+            );
 
             return;
-
         }
 
 
@@ -334,20 +300,18 @@ runBtn.addEventListener(
         runBtn.textContent =
             "⏳ Running...";
 
-
         executionStatus.textContent =
             "Running";
 
-
         terminalOutput.textContent =
-            "Executing code...";
+            `Executing ${selectedLanguage} code...`;
 
 
         try {
 
             const response =
                 await fetch(
-                    "https://codecomment-backend-api.onrender.com/api/run-code", 
+                    "http://localhost:5000/api/run-code",
                     {
                         method: "POST",
 
@@ -357,9 +321,13 @@ runBtn.addEventListener(
                         },
 
                         body: JSON.stringify({
-                            code: code
-                        })
 
+                            code: code,
+
+                            language:
+                                selectedLanguage
+
+                        })
                     }
                 );
 
@@ -382,6 +350,7 @@ runBtn.addEventListener(
                 data.output ||
                 "Program executed successfully with no output.";
 
+
             executionStatus.textContent =
                 "Success";
 
@@ -400,7 +369,6 @@ runBtn.addEventListener(
 
             runBtn.textContent =
                 "▶ Run Code";
-
         }
 
     }
@@ -408,7 +376,7 @@ runBtn.addEventListener(
 
 
 /* =====================================================
-   COPY COMMENT
+   COPY
 ===================================================== */
 
 copyBtn.addEventListener(
@@ -428,7 +396,6 @@ copyBtn.addEventListener(
             );
 
             return;
-
         }
 
 
@@ -438,11 +405,15 @@ copyBtn.addEventListener(
                 comment.textContent
             );
 
-            copyBtn.textContent = "✓";
+            copyBtn.textContent =
+                "✓";
 
             setTimeout(
                 () => {
-                    copyBtn.textContent = "📋";
+
+                    copyBtn.textContent =
+                        "📋";
+
                 },
                 1500
             );
@@ -452,7 +423,6 @@ copyBtn.addEventListener(
             alert(
                 "Unable to copy comment."
             );
-
         }
 
     }
@@ -460,7 +430,7 @@ copyBtn.addEventListener(
 
 
 /* =====================================================
-   HTML ESCAPE
+   ESCAPE HTML
 ===================================================== */
 
 function escapeHTML(text) {
@@ -471,7 +441,6 @@ function escapeHTML(text) {
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
-
 }
 
 

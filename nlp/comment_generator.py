@@ -8,236 +8,603 @@ def generate_comment(code, language="python"):
     if not code:
         return "No code was provided."
 
+    language = language.lower().strip()
 
     comments = []
 
-
     # ==========================================
-    # PYTHON FUNCTION
+    # PYTHON
     # ==========================================
 
-    functions = re.findall(
-        r"def\s+([a-zA-Z_]\w*)\s*\((.*?)\)",
-        code
-    )
+    if language == "python":
 
-    for function_name, parameters in functions:
+        # Functions
+        functions = re.findall(
+            r"def\s+([a-zA-Z_]\w*)\s*\((.*?)\)",
+            code
+        )
 
-        parameter_text = parameters.strip()
+        for function_name, parameters in functions:
 
-        if parameter_text:
+            parameters = parameters.strip()
+
+            if parameters:
+                comments.append(
+                    f"The function '{function_name}' "
+                    f"accepts parameters {parameters}."
+                )
+            else:
+                comments.append(
+                    f"The function '{function_name}' "
+                    f"does not require any parameters."
+                )
+
+        # Variable assignments
+        assignments = re.findall(
+            r"^\s*([a-zA-Z_]\w*)\s*=\s*(.+)$",
+            code,
+            re.MULTILINE
+        )
+
+        if assignments:
+
+            variable_names = [
+                name for name, value in assignments
+            ]
 
             comments.append(
-                f"The function '{function_name}' "
-                f"accepts parameters {parameter_text}."
+                "The code defines variables: "
+                + ", ".join(variable_names)
+                + "."
             )
 
-        else:
-
+        # Addition
+        if re.search(
+            r"\w+\s*=\s*\w+\s*\+\s*\w+",
+            code
+        ):
             comments.append(
-                f"The function '{function_name}' "
-                f"does not require any parameters."
+                "It performs an addition operation."
             )
 
+        # Subtraction
+        if re.search(
+            r"\w+\s*=\s*\w+\s*-\s*\w+",
+            code
+        ):
+            comments.append(
+                "It performs a subtraction operation."
+            )
+
+        # Multiplication
+        if re.search(
+            r"\w+\s*=\s*\w+\s*\*\s*\w+",
+            code
+        ):
+            comments.append(
+                "It performs a multiplication operation."
+            )
+
+        # Division
+        if re.search(
+            r"\w+\s*=\s*\w+\s*/\s*\w+",
+            code
+        ):
+            comments.append(
+                "It performs a division operation."
+            )
+
+        # Print
+        if re.search(
+            r"\bprint\s*\(",
+            code
+        ):
+            comments.append(
+                "The program displays output using "
+                "the print function."
+            )
+
+        # If
+        if re.search(
+            r"\bif\b",
+            code
+        ):
+            comments.append(
+                "The code uses a conditional statement "
+                "to make a decision."
+            )
+
+        # Else
+        if re.search(
+            r"\belse\b",
+            code
+        ):
+            comments.append(
+                "An alternative block is executed "
+                "when the condition is not satisfied."
+            )
+
+        # For
+        if re.search(
+            r"\bfor\b",
+            code
+        ):
+            comments.append(
+                "The code uses a for loop "
+                "to repeat an operation."
+            )
+
+        # While
+        if re.search(
+            r"\bwhile\b",
+            code
+        ):
+            comments.append(
+                "The code uses a while loop "
+                "for repeated execution."
+            )
+
+        # List
+        if re.search(
+            r"\[[^\]]*\]",
+            code
+        ):
+            comments.append(
+                "The code works with a list or "
+                "collection of values."
+            )
+
+        # Return
+        if re.search(
+            r"\breturn\b",
+            code
+        ):
+            comments.append(
+                "The function returns a value "
+                "to the calling code."
+            )
+
+        # Input
+        if re.search(
+            r"\binput\s*\(",
+            code
+        ):
+            comments.append(
+                "The program accepts input from the user."
+            )
 
     # ==========================================
-    # VARIABLE ASSIGNMENTS
+    # JAVA
     # ==========================================
 
-    assignments = re.findall(
-        r"^\s*([a-zA-Z_]\w*)\s*=\s*(.+)$",
-        code,
-        re.MULTILINE
-    )
+    elif language == "java":
 
-    if assignments:
+        # Class
+        if re.search(
+            r"\bclass\s+\w+",
+            code
+        ):
+            comments.append(
+                "The Java code defines a class."
+            )
 
-        variable_names = [
-            name
-            for name, value in assignments
-        ]
+        # Main method
+        if re.search(
+            r"public\s+static\s+void\s+main\s*\(",
+            code
+        ):
+            comments.append(
+                "The program contains the main method "
+                "which serves as the entry point."
+            )
 
-        comments.append(
-            "The code defines variables: "
-            + ", ".join(variable_names)
-            + "."
+        # Variables
+        java_variables = re.findall(
+            r"\b(?:int|double|float|long|short|byte|boolean|char|String)\s+(\w+)\s*=",
+            code
         )
 
+        if java_variables:
+            comments.append(
+                "The code defines variables: "
+                + ", ".join(java_variables)
+                + "."
+            )
+
+        # Addition
+        if re.search(
+            r"\w+\s*=\s*\w+\s*\+\s*\w+",
+            code
+        ):
+            comments.append(
+                "It performs an addition operation."
+            )
+
+        # Subtraction
+        if re.search(
+            r"\w+\s*=\s*\w+\s*-\s*\w+",
+            code
+        ):
+            comments.append(
+                "It performs a subtraction operation."
+            )
+
+        # Multiplication
+        if re.search(
+            r"\w+\s*=\s*\w+\s*\*\s*\w+",
+            code
+        ):
+            comments.append(
+                "It performs a multiplication operation."
+            )
+
+        # Division
+        if re.search(
+            r"\w+\s*=\s*\w+\s*/\s*\w+",
+            code
+        ):
+            comments.append(
+                "It performs a division operation."
+            )
+
+        # Print
+        if re.search(
+            r"System\.out\.(?:println|print)\s*\(",
+            code
+        ):
+            comments.append(
+                "The program displays output using "
+                "System.out."
+            )
+
+        # If
+        if re.search(
+            r"\bif\s*\(",
+            code
+        ):
+            comments.append(
+                "The code uses a conditional statement "
+                "to make a decision."
+            )
+
+        # Else
+        if re.search(
+            r"\belse\b",
+            code
+        ):
+            comments.append(
+                "An alternative block is executed "
+                "when the condition is not satisfied."
+            )
+
+        # For
+        if re.search(
+            r"\bfor\s*\(",
+            code
+        ):
+            comments.append(
+                "The code uses a for loop "
+                "to repeat an operation."
+            )
+
+        # While
+        if re.search(
+            r"\bwhile\s*\(",
+            code
+        ):
+            comments.append(
+                "The code uses a while loop "
+                "for repeated execution."
+            )
+
+        # Return
+        if re.search(
+            r"\breturn\b",
+            code
+        ):
+            comments.append(
+                "The method returns a value "
+                "to the calling code."
+            )
+
+        # Scanner input
+        if re.search(
+            r"\bScanner\b|\.next(?:Int|Line|Double|Float)\s*\(",
+            code
+        ):
+            comments.append(
+                "The program accepts input from the user."
+            )
 
     # ==========================================
-    # ADDITION
+    # JAVASCRIPT
     # ==========================================
 
-    if re.search(
-        r"\w+\s*=\s*\w+\s*\+\s*\w+",
-        code
-    ):
+    elif language in ("javascript", "js"):
 
-        comments.append(
-            "It performs an addition operation."
+        # Function
+        if re.search(
+            r"\bfunction\s+\w+\s*\(",
+            code
+        ) or re.search(
+            r"=>",
+            code
+        ):
+            comments.append(
+                "The JavaScript code defines a function."
+            )
+
+        # Variables
+        js_variables = re.findall(
+            r"\b(?:let|const|var)\s+(\w+)\s*=",
+            code
         )
 
+        if js_variables:
+            comments.append(
+                "The code defines variables: "
+                + ", ".join(js_variables)
+                + "."
+            )
+
+        # Addition
+        if re.search(
+            r"\w+\s*=\s*\w+\s*\+\s*\w+",
+            code
+        ):
+            comments.append(
+                "It performs an addition operation."
+            )
+
+        # Subtraction
+        if re.search(
+            r"\w+\s*=\s*\w+\s*-\s*\w+",
+            code
+        ):
+            comments.append(
+                "It performs a subtraction operation."
+            )
+
+        # Multiplication
+        if re.search(
+            r"\w+\s*=\s*\w+\s*\*\s*\w+",
+            code
+        ):
+            comments.append(
+                "It performs a multiplication operation."
+            )
+
+        # Division
+        if re.search(
+            r"\w+\s*=\s*\w+\s*/\s*\w+",
+            code
+        ):
+            comments.append(
+                "It performs a division operation."
+            )
+
+        # Console output
+        if re.search(
+            r"console\.(log|error|warn)\s*\(",
+            code
+        ):
+            comments.append(
+                "The program displays output using "
+                "the console."
+            )
+
+        # If
+        if re.search(
+            r"\bif\s*\(",
+            code
+        ):
+            comments.append(
+                "The code uses a conditional statement "
+                "to make a decision."
+            )
+
+        # Else
+        if re.search(
+            r"\belse\b",
+            code
+        ):
+            comments.append(
+                "An alternative block is executed "
+                "when the condition is not satisfied."
+            )
+
+        # For
+        if re.search(
+            r"\bfor\s*\(",
+            code
+        ):
+            comments.append(
+                "The code uses a for loop "
+                "to repeat an operation."
+            )
+
+        # While
+        if re.search(
+            r"\bwhile\s*\(",
+            code
+        ):
+            comments.append(
+                "The code uses a while loop "
+                "for repeated execution."
+            )
+
+        # Array
+        if re.search(
+            r"\[[^\]]*\]",
+            code
+        ):
+            comments.append(
+                "The code works with an array "
+                "of values."
+            )
+
+        # Return
+        if re.search(
+            r"\breturn\b",
+            code
+        ):
+            comments.append(
+                "The function returns a value "
+                "to the calling code."
+            )
 
     # ==========================================
-    # SUBTRACTION
+    # C++
     # ==========================================
 
-    if re.search(
-        r"\w+\s*=\s*\w+\s*-\s*\w+",
-        code
-    ):
+    elif language in ("cpp", "c++"):
 
-        comments.append(
-            "It performs a subtraction operation."
+        # Main function
+        if re.search(
+            r"\bint\s+main\s*\(",
+            code
+        ):
+            comments.append(
+                "The C++ program contains the main "
+                "function which serves as the entry point."
+            )
+
+        # Variables
+        cpp_variables = re.findall(
+            r"\b(?:int|double|float|long|char|bool|string)\s+(\w+)\s*=",
+            code
         )
 
+        if cpp_variables:
+            comments.append(
+                "The code defines variables: "
+                + ", ".join(cpp_variables)
+                + "."
+            )
+
+        # Addition
+        if re.search(
+            r"\w+\s*=\s*\w+\s*\+\s*\w+",
+            code
+        ):
+            comments.append(
+                "It performs an addition operation."
+            )
+
+        # Subtraction
+        if re.search(
+            r"\w+\s*=\s*\w+\s*-\s*\w+",
+            code
+        ):
+            comments.append(
+                "It performs a subtraction operation."
+            )
+
+        # Multiplication
+        if re.search(
+            r"\w+\s*=\s*\w+\s*\*\s*\w+",
+            code
+        ):
+            comments.append(
+                "It performs a multiplication operation."
+            )
+
+        # Division
+        if re.search(
+            r"\w+\s*=\s*\w+\s*/\s*\w+",
+            code
+        ):
+            comments.append(
+                "It performs a division operation."
+            )
+
+        # cout
+        if re.search(
+            r"\bcout\s*<<",
+            code
+        ):
+            comments.append(
+                "The program displays output using cout."
+            )
+
+        # cin
+        if re.search(
+            r"\bcin\s*>>",
+            code
+        ):
+            comments.append(
+                "The program accepts input using cin."
+            )
+
+        # If
+        if re.search(
+            r"\bif\s*\(",
+            code
+        ):
+            comments.append(
+                "The code uses a conditional statement "
+                "to make a decision."
+            )
+
+        # Else
+        if re.search(
+            r"\belse\b",
+            code
+        ):
+            comments.append(
+                "An alternative block is executed "
+                "when the condition is not satisfied."
+            )
+
+        # For
+        if re.search(
+            r"\bfor\s*\(",
+            code
+        ):
+            comments.append(
+                "The code uses a for loop "
+                "to repeat an operation."
+            )
+
+        # While
+        if re.search(
+            r"\bwhile\s*\(",
+            code
+        ):
+            comments.append(
+                "The code uses a while loop "
+                "for repeated execution."
+            )
+
+        # Array
+        if re.search(
+            r"\[[^\]]*\]",
+            code
+        ):
+            comments.append(
+                "The code works with an array "
+                "of values."
+            )
+
+        # Return
+        if re.search(
+            r"\breturn\b",
+            code
+        ):
+            comments.append(
+                "The function returns a value "
+                "to the calling code."
+            )
 
     # ==========================================
-    # MULTIPLICATION
+    # UNSUPPORTED LANGUAGE
     # ==========================================
 
-    if re.search(
-        r"\w+\s*=\s*\w+\s*\*\s*\w+",
-        code
-    ):
+    else:
 
-        comments.append(
-            "It performs a multiplication operation."
+        return (
+            f"Language '{language}' is not supported."
         )
-
-
-    # ==========================================
-    # DIVISION
-    # ==========================================
-
-    if re.search(
-        r"\w+\s*=\s*\w+\s*/\s*\w+",
-        code
-    ):
-
-        comments.append(
-            "It performs a division operation."
-        )
-
-
-    # ==========================================
-    # PRINT
-    # ==========================================
-
-    if re.search(
-        r"\bprint\s*\(",
-        code
-    ):
-
-        comments.append(
-            "The program displays output using "
-            "the print function."
-        )
-
-
-    # ==========================================
-    # IF CONDITION
-    # ==========================================
-
-    if re.search(
-        r"\bif\b",
-        code
-    ):
-
-        comments.append(
-            "The code uses a conditional statement "
-            "to make a decision."
-        )
-
-
-    # ==========================================
-    # ELSE
-    # ==========================================
-
-    if re.search(
-        r"\belse\b",
-        code
-    ):
-
-        comments.append(
-            "An alternative block is executed "
-            "when the condition is not satisfied."
-        )
-
-
-    # ==========================================
-    # FOR LOOP
-    # ==========================================
-
-    if re.search(
-        r"\bfor\b",
-        code
-    ):
-
-        comments.append(
-            "The code uses a for loop "
-            "to repeat an operation."
-        )
-
-
-    # ==========================================
-    # WHILE LOOP
-    # ==========================================
-
-    if re.search(
-        r"\bwhile\b",
-        code
-    ):
-
-        comments.append(
-            "The code uses a while loop "
-            "for repeated execution."
-        )
-
-
-    # ==========================================
-    # LIST
-    # ==========================================
-
-    if re.search(
-        r"\[[^\]]*\]",
-        code
-    ):
-
-        comments.append(
-            "The code works with a list or "
-            "collection of values."
-        )
-
-
-    # ==========================================
-    # RETURN
-    # ==========================================
-
-    if re.search(
-        r"\breturn\b",
-        code
-    ):
-
-        comments.append(
-            "The function returns a value "
-            "to the calling code."
-        )
-
-
-    # ==========================================
-    # INPUT
-    # ==========================================
-
-    if re.search(
-        r"\binput\s*\(",
-        code
-    ):
-
-        comments.append(
-            "The program accepts input from the user."
-        )
-
 
     # ==========================================
     # REMOVE DUPLICATES
@@ -251,7 +618,6 @@ def generate_comment(code, language="python"):
 
             unique_comments.append(comment)
 
-
     # ==========================================
     # FINAL COMMENT
     # ==========================================
@@ -260,8 +626,8 @@ def generate_comment(code, language="python"):
 
         return " ".join(unique_comments)
 
-
     return (
-        "The code contains programming statements "
-        "that perform a specific computational task."
+        f"The {language} code contains programming "
+        "statements that perform a specific "
+        "computational task."
     )
