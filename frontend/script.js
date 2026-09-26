@@ -7,17 +7,18 @@ const clearBtn = document.getElementById("clearBtn");
 const sampleBtn = document.getElementById("sampleBtn");
 const copyBtn = document.getElementById("copyBtn");
 
-const commentOutput =
-    document.getElementById("commentOutput");
+const commentOutput = document.getElementById("commentOutput");
+const terminalOutput = document.getElementById("outputText");
+const executionStatus = document.getElementById("executionStatus");
+const lineNumbers = document.getElementById("lineNumbers");
 
-const terminalOutput =
-    document.getElementById("outputText");
 
-const executionStatus =
-    document.getElementById("executionStatus");
+/* =====================================================
+   BACKEND
+===================================================== */
 
-const lineNumbers =
-    document.getElementById("lineNumbers");
+const BACKEND_URL =
+    "https://codecomment-backend-api.onrender.com";
 
 
 /* =====================================================
@@ -26,8 +27,7 @@ const lineNumbers =
 
 function updateLineNumbers() {
 
-    const lines =
-        codeInput.value.split("\n").length;
+    const lines = codeInput.value.split("\n").length;
 
     let numbers = "";
 
@@ -189,7 +189,7 @@ generateBtn.addEventListener(
 
             const response =
                 await fetch(
-                    "https://codecomment-backend-api.onrender.com/api/generate-comment",
+                    `${BACKEND_URL}/api/generate-comment`,
                     {
                         method: "POST",
 
@@ -200,8 +200,7 @@ generateBtn.addEventListener(
 
                         body: JSON.stringify({
                             code: code,
-                            language:
-                                selectedLanguage
+                            language: selectedLanguage
                         })
                     }
                 );
@@ -217,18 +216,22 @@ generateBtn.addEventListener(
                     data.error ||
                     "Unable to generate comment."
                 );
-
             }
 
 
             commentOutput.innerHTML = `
                 <div class="generated-comment">
-                    ${escapeHTML(data.comment)}
+                    ${escapeHTML(data.comment || "")}
                 </div>
             `;
 
 
         } catch (error) {
+
+            console.error(
+                "Generate Comment Error:",
+                error
+            );
 
             commentOutput.innerHTML = `
                 <div class="empty-state">
@@ -242,7 +245,10 @@ generateBtn.addEventListener(
                     </h3>
 
                     <p>
-                        ${escapeHTML(error.message)}
+                        ${escapeHTML(
+                            error.message ||
+                            "Failed to connect to backend."
+                        )}
                     </p>
 
                 </div>
@@ -311,7 +317,7 @@ runBtn.addEventListener(
 
             const response =
                 await fetch(
-                    "https://codecomment-backend-api.onrender.com/api/run-code",
+                    `${BACKEND_URL}/api/run-code`,
                     {
                         method: "POST",
 
@@ -321,12 +327,8 @@ runBtn.addEventListener(
                         },
 
                         body: JSON.stringify({
-
                             code: code,
-
-                            language:
-                                selectedLanguage
-
+                            language: selectedLanguage
                         })
                     }
                 );
@@ -342,7 +344,6 @@ runBtn.addEventListener(
                     data.error ||
                     "Code execution failed."
                 );
-
             }
 
 
@@ -350,15 +351,20 @@ runBtn.addEventListener(
                 data.output ||
                 "Program executed successfully with no output.";
 
-
             executionStatus.textContent =
                 "Success";
 
 
         } catch (error) {
 
+            console.error(
+                "Run Code Error:",
+                error
+            );
+
             terminalOutput.textContent =
-                error.message;
+                error.message ||
+                "Failed to connect to backend.";
 
             executionStatus.textContent =
                 "Error";
@@ -408,6 +414,7 @@ copyBtn.addEventListener(
             copyBtn.textContent =
                 "✓";
 
+
             setTimeout(
                 () => {
 
@@ -418,7 +425,13 @@ copyBtn.addEventListener(
                 1500
             );
 
+
         } catch (error) {
+
+            console.error(
+                "Copy Error:",
+                error
+            );
 
             alert(
                 "Unable to copy comment."
@@ -435,7 +448,7 @@ copyBtn.addEventListener(
 
 function escapeHTML(text) {
 
-    return text
+    return String(text)
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
