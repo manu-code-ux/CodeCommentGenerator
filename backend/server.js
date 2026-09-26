@@ -6,19 +6,69 @@ const path = require("path");
 const os = require("os");
 
 const app = express();
+
+/* ============================================
+   SERVER CONFIGURATION
+============================================ */
+
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
-app.use(express.json());
+const IS_WINDOWS = process.platform === "win32";
+
+const PYTHON_COMMAND = process.env.PYTHON_COMMAND ||
+    (IS_WINDOWS ? "python" : "python3");
+
+/* ============================================
+   MIDDLEWARE
+============================================ */
+
+app.use(
+    cors({
+        origin: [
+            "https://codecommentgenerator-1.onrender.com",
+            "http://localhost:5500",
+            "http://127.0.0.1:5500",
+            "http://localhost:3000",
+            "http://127.0.0.1:3000"
+        ],
+        methods: ["GET", "POST", "OPTIONS"],
+        allowedHeaders: ["Content-Type"]
+    })
+);
+
+app.use(express.json({ limit: "1mb" }));
 
 /* ============================================
    PATHS
 ============================================ */
 
 const PROJECT_ROOT = path.resolve(__dirname, "..");
-const NLP_APP = path.join(PROJECT_ROOT, "nlp", "app.py");
 
+const NLP_APP = path.join(
+    PROJECT_ROOT,
+    "nlp",
+    "app.py"
+);
+
+/*
+   Windows-only MSYS2 path.
+   Used only when running locally on Windows.
+*/
 const MSYS2_BASH = "C:\\msys64\\usr\\bin\\bash.exe";
+
+/* ============================================
+   LOGGING
+============================================ */
+
+console.log("========================================");
+console.log("       CodeComment AI Backend");
+console.log("========================================");
+console.log("Platform:", process.platform);
+console.log("Node:", process.version);
+console.log("Python command:", PYTHON_COMMAND);
+console.log("Project root:", PROJECT_ROOT);
+console.log("NLP app:", NLP_APP);
+console.log("========================================");
 
 /* ============================================
    HELPERS
@@ -31,9 +81,16 @@ function cleanupDirectory(directory) {
             force: true
         });
     } catch (error) {
-        console.error("Cleanup error:", error.message);
+        console.error(
+            "Cleanup error:",
+            error.message
+        );
     }
 }
+
+/* ============================================
+   COLLECT PROCESS OUTPUT
+============================================ */
 
 function collectProcessOutput(process, res) {
     let output = "";
@@ -93,9 +150,12 @@ function collectProcessOutput(process, res) {
 function toMsysPath(filePath) {
     return filePath
         .replace(/\\/g, "/")
-        .replace(/^([A-Za-z]):/, (_, drive) => {
-            return "/" + drive.toLowerCase();
-        });
+        .replace(
+            /^([A-Za-z]):/,
+            (_, drive) => {
+                return "/" + drive.toLowerCase();
+            }
+        );
 }
 
 /* ============================================
@@ -105,19 +165,23 @@ function toMsysPath(filePath) {
 app.get("/", (req, res) => {
     res.json({
         success: true,
-        message: "CodeComment AI Backend is running"
+        message: "CodeComment AI Backend is running",
+        platform: process.platform
     });
 });
 
 /* ============================================
-   HEALTH
+   HEALTH CHECK
 ============================================ */
 
 app.get("/api/health", (req, res) => {
     res.json({
         success: true,
         service: "CodeComment AI",
-        status: "online"
+        status: "online",
+        platform: process.platform,
+        python: PYTHON_COMMAND,
+        nlpAppExists: fs.existsSync(NLP_APP)
     });
 });
 
@@ -136,10 +200,29 @@ app.post("/api/generate-comment", (req, res) => {
     }
 
     const selectedLanguage =
-        (language || "python").toLowerCase();
+        (language || "python")
+            .toLowerCase()
+            .trim();
+
+    if (!fs.existsSync(NLP_APP)) {
+        console.error(
+            "NLP application not found:",
+            NLP_APP
+        );
+
+        return res.status(500).json({
+            success: false,
+            error:
+                "NLP application file was not found on the server."
+        });
+    }
+
+    console.log(
+        `Generating comment for ${selectedLanguage}`
+    );
 
     const pythonProcess = spawn(
-        "python",
+        PYTHON_COMMAND,
         [
             NLP_APP,
             code,
@@ -162,12 +245,17 @@ app.post("/api/generate-comment", (req, res) => {
     });
 
     pythonProcess.on("error", (error) => {
-        console.error(error);
+        console.error(
+            "Python process error:",
+            error
+        );
 
         if (!res.headersSent) {
             res.status(500).json({
                 success: false,
-                error: "Python NLP service could not start."
+                error:
+                    "Python NLP service could not start.",
+                details: error.message
             });
         }
     });
@@ -178,7 +266,10 @@ app.post("/api/generate-comment", (req, res) => {
         }
 
         if (exitCode !== 0) {
-            console.error(errorOutput);
+            console.error(
+                "NLP ERROR:",
+                errorOutput
+            );
 
             return res.status(500).json({
                 success: false,
@@ -189,7 +280,10 @@ app.post("/api/generate-comment", (req, res) => {
         }
 
         try {
-            const result = JSON.parse(output);
+            const result = JSON.parse(
+                output.trim()
+            );
+
             return res.json(result);
         } catch (error) {
             console.error(
@@ -212,11 +306,17 @@ app.post("/api/generate-comment", (req, res) => {
 
 function runPython(code, res) {
     const process = spawn(
-        "python",
-        ["-c", code]
+        PYTHON_COMMAND,
+        ["-c", code],
+        {
+            cwd: PROJECT_ROOT
+        }
     );
 
-    collectProcessOutput(process, res);
+    collectProcessOutput(
+        process,
+        res
+    );
 }
 
 /* ============================================
@@ -226,10 +326,16 @@ function runPython(code, res) {
 function runJavaScript(code, res) {
     const process = spawn(
         "node",
-        ["-e", code]
+        ["-e", code],
+        {
+            cwd: PROJECT_ROOT
+        }
     );
 
-    collectProcessOutput(process, res);
+    collectProcessOutput(
+        process,
+        res
+    );
 }
 
 /* ============================================
@@ -237,17 +343,19 @@ function runJavaScript(code, res) {
 ============================================ */
 
 function runJava(code, res) {
-    const tempDirectory = fs.mkdtempSync(
-        path.join(
-            os.tmpdir(),
-            "codecomment-java-"
-        )
-    );
+    const tempDirectory =
+        fs.mkdtempSync(
+            path.join(
+                os.tmpdir(),
+                "codecomment-java-"
+            )
+        );
 
-    const javaFile = path.join(
-        tempDirectory,
-        "Main.java"
-    );
+    const javaFile =
+        path.join(
+            tempDirectory,
+            "Main.java"
+        );
 
     try {
         fs.writeFileSync(
@@ -260,11 +368,15 @@ function runJava(code, res) {
             "javac",
             [javaFile],
             (compileError, stdout, stderr) => {
+
                 if (compileError) {
-                    cleanupDirectory(tempDirectory);
+                    cleanupDirectory(
+                        tempDirectory
+                    );
 
                     return res.status(400).json({
                         success: false,
+                        language: "java",
                         error:
                             stderr.trim() ||
                             compileError.message ||
@@ -279,12 +391,20 @@ function runJava(code, res) {
                         tempDirectory,
                         "Main"
                     ],
-                    (runError, runStdout, runStderr) => {
-                        cleanupDirectory(tempDirectory);
+                    (
+                        runError,
+                        runStdout,
+                        runStderr
+                    ) => {
+
+                        cleanupDirectory(
+                            tempDirectory
+                        );
 
                         if (runError) {
                             return res.status(400).json({
                                 success: false,
+                                language: "java",
                                 error:
                                     runStderr.trim() ||
                                     runError.message ||
@@ -295,17 +415,23 @@ function runJava(code, res) {
                         return res.json({
                             success: true,
                             language: "java",
-                            output: runStdout.trim()
+                            output:
+                                runStdout.trim()
                         });
                     }
                 );
             }
         );
+
     } catch (error) {
-        cleanupDirectory(tempDirectory);
+
+        cleanupDirectory(
+            tempDirectory
+        );
 
         return res.status(500).json({
             success: false,
+            language: "java",
             error: error.message
         });
     }
@@ -313,87 +439,205 @@ function runJava(code, res) {
 
 /* ============================================
    RUN C++
-   
-   IMPORTANT:
-   C++ is compiled AND executed through
-   MSYS2 UCRT64 bash environment.
 ============================================ */
 
 function runCpp(code, res) {
-    const tempDirectory = fs.mkdtempSync(
+
+    const tempDirectory =
+        fs.mkdtempSync(
+            path.join(
+                os.tmpdir(),
+                "codecomment-cpp-"
+            )
+        );
+
+    const cppFile =
         path.join(
-            os.tmpdir(),
-            "codecomment-cpp-"
-        )
-    );
+            tempDirectory,
+            "main.cpp"
+        );
 
-    const cppFile = path.join(
-        tempDirectory,
-        "main.cpp"
-    );
-
-    const exeFile = path.join(
-        tempDirectory,
-        "main.exe"
-    );
+    const exeFile =
+        path.join(
+            tempDirectory,
+            IS_WINDOWS
+                ? "main.exe"
+                : "main"
+        );
 
     try {
+
         fs.writeFileSync(
             cppFile,
             code,
             "utf8"
         );
 
-        const msysCppFile = toMsysPath(cppFile);
-        const msysExeFile = toMsysPath(exeFile);
+        /*
+           WINDOWS
+           --------
+           Use MSYS2 UCRT64.
+        */
+
+        if (IS_WINDOWS) {
+
+            if (
+                !fs.existsSync(
+                    MSYS2_BASH
+                )
+            ) {
+                cleanupDirectory(
+                    tempDirectory
+                );
+
+                return res.status(500).json({
+                    success: false,
+                    language: "cpp",
+                    error:
+                        "MSYS2 bash was not found."
+                });
+            }
+
+            const msysCppFile =
+                toMsysPath(cppFile);
+
+            const msysExeFile =
+                toMsysPath(exeFile);
+
+            const bashCommand =
+                "export PATH=/ucrt64/bin:/usr/bin && " +
+                `g++ "${msysCppFile}" -o "${msysExeFile}" && ` +
+                `"${msysExeFile}"`;
+
+            execFile(
+                MSYS2_BASH,
+                [
+                    "-lc",
+                    bashCommand
+                ],
+                {
+                    windowsHide: true,
+                    maxBuffer:
+                        1024 * 1024
+                },
+                (
+                    error,
+                    stdout,
+                    stderr
+                ) => {
+
+                    cleanupDirectory(
+                        tempDirectory
+                    );
+
+                    if (error) {
+                        return res.status(400).json({
+                            success: false,
+                            language: "cpp",
+                            error:
+                                stderr.trim() ||
+                                stdout.trim() ||
+                                error.message ||
+                                "C++ compilation/execution failed."
+                        });
+                    }
+
+                    return res.json({
+                        success: true,
+                        language: "cpp",
+                        output:
+                            stdout.trim()
+                    });
+                }
+            );
+
+            return;
+        }
 
         /*
-         * Compile and execute inside the SAME
-         * MSYS2 UCRT64 environment.
-         *
-         * This avoids the Windows direct-exec
-         * problem with MSYS2/UCRT64 DLLs.
-         */
-
-        const bashCommand =
-            "export PATH=/ucrt64/bin:/usr/bin && " +
-            `g++ "${msysCppFile}" -o "${msysExeFile}" && ` +
-            `"${msysExeFile}"`;
+           LINUX / RENDER
+           --------------
+           Use normal g++.
+        */
 
         execFile(
-            MSYS2_BASH,
+            "g++",
             [
-                "-lc",
-                bashCommand
+                cppFile,
+                "-o",
+                exeFile
             ],
             {
-                windowsHide: true,
-                maxBuffer: 1024 * 1024
+                maxBuffer:
+                    1024 * 1024
             },
-            (error, stdout, stderr) => {
-                cleanupDirectory(tempDirectory);
+            (
+                compileError,
+                stdout,
+                stderr
+            ) => {
 
-                if (error) {
+                if (compileError) {
+
+                    cleanupDirectory(
+                        tempDirectory
+                    );
+
                     return res.status(400).json({
                         success: false,
                         language: "cpp",
                         error:
                             stderr.trim() ||
-                            stdout.trim() ||
-                            error.message ||
-                            "C++ compilation/execution failed."
+                            compileError.message ||
+                            "C++ compilation failed."
                     });
                 }
 
-                return res.json({
-                    success: true,
-                    language: "cpp",
-                    output: stdout.trim()
-                });
+                execFile(
+                    exeFile,
+                    [],
+                    {
+                        cwd: tempDirectory,
+                        maxBuffer:
+                            1024 * 1024
+                    },
+                    (
+                        runError,
+                        runStdout,
+                        runStderr
+                    ) => {
+
+                        cleanupDirectory(
+                            tempDirectory
+                        );
+
+                        if (runError) {
+                            return res.status(400).json({
+                                success: false,
+                                language: "cpp",
+                                error:
+                                    runStderr.trim() ||
+                                    runError.message ||
+                                    "C++ execution failed."
+                            });
+                        }
+
+                        return res.json({
+                            success: true,
+                            language: "cpp",
+                            output:
+                                runStdout.trim()
+                        });
+                    }
+                );
             }
         );
+
     } catch (error) {
-        cleanupDirectory(tempDirectory);
+
+        cleanupDirectory(
+            tempDirectory
+        );
 
         return res.status(500).json({
             success: false,
@@ -408,11 +652,9 @@ function runCpp(code, res) {
 ============================================ */
 
 app.post("/api/run-code", (req, res) => {
-    const { code, language } = req.body;
 
-    /* -----------------------------------------
-       Validate code
-    ----------------------------------------- */
+    const { code, language } =
+        req.body;
 
     if (!code || !code.trim()) {
         return res.status(400).json({
@@ -420,10 +662,6 @@ app.post("/api/run-code", (req, res) => {
             error: "Code is required."
         });
     }
-
-    /* -----------------------------------------
-       Validate language
-    ----------------------------------------- */
 
     if (!language) {
         return res.status(400).json({
@@ -433,53 +671,59 @@ app.post("/api/run-code", (req, res) => {
     }
 
     const selectedLanguage =
-        language.toLowerCase().trim();
+        language
+            .toLowerCase()
+            .trim();
 
     console.log(
         `Running ${selectedLanguage} code...`
     );
 
-    /* =========================================
-       PYTHON
-    ========================================= */
+    /* PYTHON */
 
-    if (selectedLanguage === "python") {
-        return runPython(code, res);
+    if (
+        selectedLanguage === "python"
+    ) {
+        return runPython(
+            code,
+            res
+        );
     }
 
-    /* =========================================
-       JAVASCRIPT
-    ========================================= */
+    /* JAVASCRIPT */
 
     if (
         selectedLanguage === "javascript" ||
         selectedLanguage === "js"
     ) {
-        return runJavaScript(code, res);
+        return runJavaScript(
+            code,
+            res
+        );
     }
 
-    /* =========================================
-       JAVA
-    ========================================= */
+    /* JAVA */
 
-    if (selectedLanguage === "java") {
-        return runJava(code, res);
+    if (
+        selectedLanguage === "java"
+    ) {
+        return runJava(
+            code,
+            res
+        );
     }
 
-    /* =========================================
-       C++
-    ========================================= */
+    /* C++ */
 
     if (
         selectedLanguage === "cpp" ||
         selectedLanguage === "c++"
     ) {
-        return runCpp(code, res);
+        return runCpp(
+            code,
+            res
+        );
     }
-
-    /* =========================================
-       UNSUPPORTED LANGUAGE
-    ========================================= */
 
     return res.status(400).json({
         success: false,
@@ -496,28 +740,48 @@ const server = app.listen(
     PORT,
     "0.0.0.0",
     () => {
+
         console.log("");
-        console.log("========================================");
-        console.log("       CodeComment AI Backend");
-        console.log("========================================");
         console.log(
-            `Server: http://localhost:${PORT}`
+            "========================================"
         );
-        console.log("Status: ONLINE");
-        console.log("Python: Connected");
-        console.log("JavaScript: Connected");
-        console.log("Java: Connected");
-        console.log("C++: Connected");
-        console.log("========================================");
+        console.log(
+            "       CodeComment AI Backend"
+        );
+        console.log(
+            "========================================"
+        );
+        console.log(
+            `Server listening on port ${PORT}`
+        );
+        console.log(
+            `Platform: ${process.platform}`
+        );
+        console.log(
+            `Python: ${PYTHON_COMMAND}`
+        );
+        console.log(
+            `NLP file exists: ${fs.existsSync(NLP_APP)}`
+        );
+        console.log(
+            "Status: ONLINE"
+        );
+        console.log(
+            "========================================"
+        );
         console.log("");
     }
 );
 
 server.on("error", (error) => {
-    console.error("SERVER ERROR:");
-    console.error(error);
+    console.error(
+        "SERVER ERROR:",
+        error
+    );
 });
 
 server.on("close", () => {
-    console.log("SERVER CLOSED");
+    console.log(
+        "SERVER CLOSED"
+    );
 });
