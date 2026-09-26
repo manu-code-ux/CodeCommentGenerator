@@ -2,7 +2,7 @@ FROM node:24-bookworm
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        openjdk-21-jdk \
+       default-jdk \
         python3 \
         g++ \
     && rm -rf /var/lib/apt/lists/*
